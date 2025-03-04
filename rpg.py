@@ -1,6 +1,7 @@
 import random
 import time
 
+# TODO: Convert character dictionary templates into objects
 
 # TODO: Maybe implement difiiculty levels that change the player/enemy stats
 player = {
@@ -46,6 +47,14 @@ enemy_4 = {
 }
 
 enemies = [enemy_1, enemy_2, enemy_3, enemy_4]
+
+'''
+MC has inventory "inventory" : [1,2,3] 
+different uses of items
+Shop.
+choice of opening inventory every round
+while in batttle : item, and different atk, and spells
+'''
 
 def get_enemy() -> dict:
     return enemies[random.randint(0, len(enemies) - 1)].copy()
@@ -101,9 +110,9 @@ def level_up(player: dict) -> None:
     print("You leveled up! Do you want to increase:")
     choice = input("Strength or Max Health? (S),(MH)").lower()
     if choice == "mh":
-        player["max health"] = player["max health"] * 1.2
+        player["max health"] = int(player["max health"] * 1.2)
     elif choice == "s":
-        player["attack"] = player["attack"] * 1.2
+        player["attack"] = int(player["attack"] * 1.5)
          
 
 # Custom intro:
