@@ -1,4 +1,5 @@
 import random
+from typing import Dict
 
 class Entity:
     def __init__(
@@ -32,22 +33,26 @@ class Player(Entity):
         level: int = 1,
         xp: int = 0,
         money: int = 0,
-        inventory: list[list] = [
-            ["1. Healing Potion", 2],
-            ["2. Max Health Potion", 1],
-            ["3. Strength Potion", 1]
-        ]
+        inventory: Dict[str, int] = {
+            "Healing Potion": 2,
+            "Max Health Potion": 1,
+            "Strength Potion": 1
+        }
     ):
         super().__init__(name, health, attack, xp, money)
         self.level = level
+        self.max_health = health # Initialize max_health
         self.inventory = inventory
 
     def print_inventory(self) -> None:
-        for item, quantity in self.inventory:
-            if quantity == 0:
-                continue    # skip
-
-            print(item, ":", str(quantity), "left")
+        print("Inventory:")
+        if not self.inventory:
+            print("  Empty")
+            return
+        # Enumerate to provide numbers for selection
+        for i, (item, quantity) in enumerate(self.inventory.items()):
+            if quantity > 0:
+                print(f"  {i + 1}. {item}: {quantity}")
 
 class Enemy(Entity):
     def __init__(
@@ -91,10 +96,13 @@ class Ogre(Entity):
         super().__init__("Ogre", health, attack, xp, money)
 
 def get_random_enemy(player: Player) -> Entity:
-    if player.level > 10:
-        enemies = [Iron_Cube(), Ogre()]
+    # Use player level to potentially scale enemies or select different ones
+    if player.level > 10: # Example: harder enemies for higher levels
+        enemies = [Iron_Cube(), Ogre()] # Add potentially harder enemies later
+    elif player.level > 5:
+         enemies = [Slime(), Iron_Cube(), Ogre()]
     else:
-        enemies = [Slime(), Iron_Cube(), Ogre()]
+        enemies = [Slime(), Iron_Cube()] # Start with easier enemies
     return random.choice(enemies)
 
 # Testing single file entities.py
@@ -104,6 +112,7 @@ if __name__ == "__main__":
     
     player = Player()
     player.print_basic_stats()
+    print(f"Max Health: {player.max_health}") # Test max_health
     player.print_inventory()
     
     slime = Slime()
@@ -115,5 +124,6 @@ if __name__ == "__main__":
     ogre = Ogre()
     ogre.print_basic_stats()
     
-    enemy = get_random_enemy()
+    # Pass player object to get_random_enemy
+    enemy = get_random_enemy(player)
     enemy.print_basic_stats()
