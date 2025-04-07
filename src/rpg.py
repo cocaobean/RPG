@@ -1,47 +1,6 @@
-import mc
+import entities
 import random
 import time
-
-# TODO: Convert character dictionary templates into objects
-
-# TODO: different enemies have different xp increase
-enemy_1 = {
-  "name": "Blob",
-  "description": "This guy is super duper evil.",
-  "health": 6,
-  "attack": 2,
-  "xp": 5,
-  "money" : 5,
-}
-
-enemy_2 = {
-  "name": "Slime",
-  "description": "Man I hate this guy.",
-  "health": 6,
-  "attack": 3,
-  "xp": 6,
-  "money" : 6
-}
-
-enemy_3 = {
-  "name": "Metal Cube",
-  "description": "NOOO!!! Not him again.",
-  "health": 10,
-  "attack": 1,
-  "xp" : 5,
-  "money" : 5
-}
-
-enemy_4 = {
-  "name": "Ogre",
-  "description": "That sword looks big",
-  "health": 5,
-  "attack": 6,
-  "xp" : 7,
-  "money" : 7
-}
-
-enemies = [enemy_1, enemy_2, enemy_3, enemy_4]
 
 '''
 MC has inventory "inventory" : [1,2,3] 
@@ -51,67 +10,66 @@ choice of opening inventory every round
 while in batttle : item, and different atk, and spells
 '''
 
-def shop(player: mc.Player):
+def shop(player: entities.Player):
     # TODO: add more stuf to the shop, make on_sale a list so there are multiple things on sale
     print("Welcome to the shop! You have", player.money, "dollars.", "This is what's on sale today.")
     stock = [("1. Healing Potions", 20), ("2. Max Health Potions", 30), ("3. Strength Potions", 20)]
     randInt = random.randint(0,2)
     on_sale = stock[randInt]
     while True:
-        print("How much", on_sale[0],+", for",on_sale[1], "dollars each, would you like to buy?")#TODO: make sure that game dosn't error when they put in a letter
-        amount = int(input())
-        if player.money >= amount * int(on_sale[1]) and amount >= 0:
-            player.money -= amount * int(on_sale[1])
-            player.inventory[randInt][1] += amount
+        #TODO: make sure that game dosn't error when they put in a letter
+        print("How much", on_sale[0], ", for", on_sale[1], "dollars each, would you like to buy?")
+        amount = input()
+        if amount.isnumeric():
+            amount = int(amount)
+            if player.money >= amount * int(on_sale[1]) and amount >= 0:
+                player.money -= amount * int(on_sale[1])
+                player.inventory[randInt][1] += amount
+            else:
+                print("You're too poor.")
+            print("You have", player.money, "dollars left.")
+            player.print_inventory()
+            leave = input("Do You want to leave? (y,n)").lower()
+            if leave == "y":
+                print("Thank you for shopping!")
+                break
         else:
-            print("You're too poor.")
-        print("You have", player.money, "dollars left.")
-        for i in range(len(player.inventory)):
-            if player.inventory[i][1] > 0:
-                print(player.inventory[i][0], ":", str(player.inventory[i][1]), "left")
-        leave = input("Do You want to leave? (y,n)").lower()
-        if leave == "y":
-            print("Thank you for shopping!")
-            break
+            print("Please Enter an Integer.")
             
 def use_item(item_chosen):
     pass
     # TODO: add what happens when you use an item.
 
-def get_enemy() -> dict:
-    return enemies[random.randint(0, len(enemies) - 1)].copy()
-
-def print_status(player: dict, enemy: dict) -> None:
+def print_status(player: entities.Player, enemy: entities.Enemy) -> None:
     print(player.name, "has", player.health, "health")
-    print(enemy["name"], "has", enemy["health"], "health")
+    print(enemy.name, "has", enemy.health, "health")
 
-def player_attack(player: dict, enemy: dict) -> bool:
-    enemy["health"] -= player.attack
-    print("You dealt", player.attack,"damage. The enemie has",enemy["health"],"health left.")
-    if enemy["health"] <= 0:
-        player.xp += enemy["xp"]
-        player.money += enemy["money"]
-        print("You have defeated",enemy["name"],". You gained", enemy["xp"] , "XP, and",enemy["money"], "dollars.")
+def player_attack(player: entities.Player, enemy: entities.Enemy) -> bool:
+    enemy.health -= player.attack
+    print("You dealt", player.attack,"damage. The enemie has",enemy.health,"health left.")
+    if enemy.health <= 0:
+        player.xp += enemy.xp
+        player.money += enemy.money
+        print("You have defeated",enemy.name,". You gained", enemy.xp , "XP, and",enemy.money, "dollars.")
         return True
     else:
         return False
 
-def enemy_attack(player: dict, enemy: dict) -> bool:
-    player.health -= enemy["attack"]
-    print(enemy["name"],"dealt", enemy["attack"],"damage. You have",player.health,"health left.")
+def enemy_attack(player: entities.Player, enemy: entities.Enemy) -> bool:
+    player.health -= enemy.attack
+    print(enemy.name,"dealt", enemy.attack,"damage. You have",player.health,"health left.")
     if player.health <= 0:
-        print("You have been defeated by",enemy["name"],".")
+        print("You have been defeated by",enemy.name,".")
         print("GAME OVER")
         return True
     else:
         return False
 
-def fight(player: mc.Player, enemy: dict) -> None:
-    print("A wild", enemy['name'], "appears!")
-    print(enemy["description"])
+def fight(player: entities.Player, enemy: entities.Enemy) -> None:
+    print("A wild", enemy.name, "appears!")
     print() # for formatting
 
-    while player.health > 0 and enemy['health'] > 0:
+    while player.health > 0 and enemy.health > 0:
         print_status(player, enemy)
         print("1. Attack")
         print("2. Run")
@@ -140,7 +98,7 @@ def fight(player: mc.Player, enemy: dict) -> None:
         else:
             print("Invalid choice. Try again.")
 
-def level_up(player: dict) -> None:
+def level_up(player: entities.Player) -> None:
     print("You leveled up! Do you want to increase:")
     choice = input("Strength or Max Health? (S),(MH)").lower()
     player.level += 1
@@ -169,10 +127,10 @@ else:
         time.sleep(0.1)
 
 name = input("What is your name? ")
-player1 = mc.Player(name=name)
+player1 = entities.Player(name=name)
 
 while True:
-    enemy = get_enemy()
+    enemy = entities.get_random_enemy(player1)
     fight(player1, enemy)
     if player1.health <= 0:
         print("Game Over!")
